@@ -4,13 +4,17 @@
 function createMap(){
     //create the map
     var map = L.map('map', {
-        center: [20, 0],
-        zoom: 2
+        center: [35, 108],
+        zoom: 4
     });
 
-    //add OSM base tilelayer
-    L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+    //add base tilelayer
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>, AQI data from <a href="http://datacenter.mep.gov.cn">China Ministry of Environmental Protection</a>',
+        maxZoom: 18,
+        id: 'duanyang.p62co5ca',
+        accessToken: 'pk.eyJ1IjoiZHVhbnlhbmciLCJhIjoiY2lrcG12MmpmMTJoNXUybTZhaWI4eXM4cCJ9.GikD77VU-5CGqW_XAazYYw'
+    // add this tile layer to the map
     }).addTo(map);
 
     //call getData function
@@ -20,7 +24,7 @@ function createMap(){
 //Step 3: Add circle markers for point features to the map
 function createPropSymbols(data, map){
     //Step 4: Determine which attribute to visualize with proportional symbols
-    var attribute = "Pop_2015";
+    var attribute = "2008";
     //create marker options
     var geojsonMarkerOptions = {
         radius: 8,
@@ -48,7 +52,7 @@ function createPropSymbols(data, map){
 //Step 2: Import GeoJSON data
 function getData(map){
     //load the data
-    $.ajax("data/MegaCities.geojson", {
+    $.ajax("data/ChinaAQI.geojson", {
         dataType: "json",
         success: function(response){
             //call function to create proportional symbols
@@ -60,7 +64,7 @@ function getData(map){
 //calculate the radius of each proportional symbol
 function calcPropRadius(attValue) {
     //scale factor to adjust symbol size evenly
-    var scaleFactor = 50;
+    var scaleFactor = 20;
     //area based on attribute value and scale factor
     var area = attValue * scaleFactor;
     //radius calculated based on area
