@@ -4,7 +4,7 @@
 function createMap(){
     //create the map
     var map = L.map('map', {
-        center: [35, 108],
+        center: [36, 108],
         zoom: 4
     });
 
@@ -22,30 +22,11 @@ function createMap(){
 };
 
 //Step 3: Add circle markers for point features to the map
+//Add circle markers for point features to the map
 function createPropSymbols(data, map){
-    //Step 4: Determine which attribute to visualize with proportional symbols
-    var attribute = "2008";
-    //create marker options
-    var geojsonMarkerOptions = {
-        radius: 8,
-        fillColor: "#ff7800",
-        color: "#000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-    };
-
     //create a Leaflet GeoJSON layer and add it to the map
     L.geoJson(data, {
-        pointToLayer: function (feature, latlng) {
-            //Step 5: For each feature, determine its value for the selected attribute
-            var attValue = Number(feature.properties[attribute]);
-
-            //Step 6: Give each feature's circle marker a radius based on its attribute value
-            geojsonMarkerOptions.radius = calcPropRadius(attValue);
-            //create circle markers
-            return L.circleMarker(latlng, geojsonMarkerOptions);
-        }
+        pointToLayer: pointToLayer
     }).addTo(map);
 };
 
@@ -72,6 +53,43 @@ function calcPropRadius(attValue) {
 
     return radius;
 };
+
+//function to convert markers to circle markers
+function pointToLayer(feature, latlng){
+    //Determine which attribute to visualize with proportional symbols
+    var attribute = "2008";
+
+    //create marker options
+    var options = {
+        fillColor: "#ff7800",
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+    };
+
+    //For each feature, determine its value for the selected attribute
+    var attValue = Number(feature.properties[attribute]);
+
+    //Give each feature's circle marker a radius based on its attribute value
+    options.radius = calcPropRadius(attValue);
+
+    //create circle marker layer
+    var layer = L.circleMarker(latlng, options);
+    //build popup content string starting with city...Example 2.1 line 24
+    var popupContent = "<p><b>City:</b> " + feature.properties.City + "</p>";
+
+    //add formatted attribute to popup content string
+    var year = attribute.toString();
+    popupContent += "<p><b>Air Quality Index in " + year + ":</b> " + feature.properties[attribute] + "</p>";
+    
+    //bind the popup to the circle marker
+    layer.bindPopup(popupContent);
+
+    //return the circle marker to the L.geoJson pointToLayer option
+    return layer;
+};
+
 
 
 $(document).ready(createMap);
