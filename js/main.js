@@ -11,7 +11,8 @@ function createMap(){
     //add base tilelayer
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>, AQI data from <a href="http://datacenter.mep.gov.cn">China Ministry of Environmental Protection</a>',
-        maxZoom: 18,
+        maxZoom: 7,
+        minZoom: 3,
         id: 'duanyang.p62co5ca',
         accessToken: 'pk.eyJ1IjoiZHVhbnlhbmciLCJhIjoiY2lrcG12MmpmMTJoNXUybTZhaWI4eXM4cCJ9.GikD77VU-5CGqW_XAazYYw'
     // add this tile layer to the map
@@ -23,10 +24,12 @@ function createMap(){
 
 //Step 3: Add circle markers for point features to the map
 //Add circle markers for point features to the map
-function createPropSymbols(data, map){
+function createPropSymbols(data, map, attributes){
     //create a Leaflet GeoJSON layer and add it to the map
     L.geoJson(data, {
-        pointToLayer: pointToLayer
+        pointToLayer: function(feature, latlng) {
+            return pointToLayer(feature, latlng, attributes);
+        }
     }).addTo(map);
 };
 
@@ -36,8 +39,12 @@ function getData(map){
     $.ajax("data/ChinaAQI.geojson", {
         dataType: "json",
         success: function(response){
+            //create an attributes array
+            var attributes = processData(response);
             //call function to create proportional symbols
-            createPropSymbols(response, map);
+            createPropSymbols(response, map, attributes);
+            //call function to create sequence control
+            createSequenceControls(map);
         }
     });
 };
@@ -55,9 +62,10 @@ function calcPropRadius(attValue) {
 };
 
 //function to convert markers to circle markers
-function pointToLayer(feature, latlng){
+function pointToLayer(feature, latlng, attributes){
     //Determine which attribute to visualize with proportional symbols
-    var attribute = "2008";
+    var attribute = attributes[0];
+    console.log(attribute);
 
     //create marker options
     var options = {
@@ -88,6 +96,50 @@ function pointToLayer(feature, latlng){
 
     //return the circle marker to the L.geoJson pointToLayer option
     return layer;
+};
+
+
+//functions to enable sequence control
+//Step 1: Create new sequence controls
+function createSequenceControls(map){
+    //create range input element (slider)
+    $('#map').append('<input class="range-slider" type="range">');
+    //event listener for slider
+    $('.range-slider').on('input', function(){
+        //sequence
+        var index = $(this).val();
+
+    });
+
+    //set slider attributes
+    $('.range-slider').attr({
+        max: 6,
+        min: 0,
+        value: 0,
+        step: 1
+    });
+};
+
+//
+function processData(data){
+    //empty array to hold attributes
+    var attributes = [];
+
+    //properties of the first feature in the dataset
+    var properties = data.features[0].properties;
+
+    //push each attribute name into attributes array
+    for (var attribute in properties){
+        //only take attributes with population values
+        if (attribute.indexOf("20") > -1){
+            attributes.push(attribute);
+        };
+    };
+
+    //check result
+    console.log(attributes);
+
+    return attributes;
 };
 
 
