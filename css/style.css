@@ -20,12 +20,12 @@
 }
 
 .slider-label {
-    background: white;
+    /*background: white;*/
     border-radius: 5px;
     border-color: black;
     font-size: 24px;
     font-weight: bold;
-    float: top;
+    float: right;
     color: #555;
 }
 
