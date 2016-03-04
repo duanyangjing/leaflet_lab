@@ -6,8 +6,9 @@
 		<title>China air quality</title>
 
 		<!--put your external stylesheet links here-->
+<!-- 		<link href='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.css' rel='stylesheet' />
+ -->	<link rel="stylesheet" href="lib/leaflet/leaflet.css" />
 		<link rel="stylesheet" href="css/style.css">
-		<link rel="stylesheet" href="lib/leaflet/leaflet.css" />
 		<!--[if IE<9]>
 			<link rel="stylesheet" href="css/style.ie.css">
 		<![endif]-->
@@ -15,14 +16,21 @@
 
 	<body>
 		<!--put your initial page content here-->
+		<nav id='menu-ui' class='menu-ui'>
+	    <a href='#' class='active' id='filter-all'>All</a>
+	    <a href='#' id='filter-good'>Good</a>
+		</nav>
 		<div id="map"></div>
+		<div id="panel"></div>
 		<!--you can also use this space for internal scripts or stylesheets;
 		place these within <script> or <style> tags-->
 
 		<!--put your external script links here-->
 		<script type="text/javascript" src="lib/leaflet/leaflet.js"></script>
+		<script src='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.js'></script>
 		<script type="text/javascript" src="lib/jquery-1.12.0.js"></script>
 		<script type="text/javascript" src="js/main.js"></script>
+
 		<!-- <script type="text/javascript" src="js/geojson.js"></script> -->
 		<!-- <script type="text/javascript" src="js/tutorials.js"></script> -->
 	</body>
