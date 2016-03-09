@@ -34,9 +34,18 @@
 }
 
 .slider-label {
+<<<<<<< HEAD
     clear: left;
     font-size: 24px;
     font-weight: bold;
+=======
+    /*background: white;*/
+    border-radius: 5px;
+    border-color: black;
+    font-size: 24px;
+    font-weight: bold;
+    float: right;
+>>>>>>> origin/master
     color: #555;
 }
 
