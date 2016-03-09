@@ -2,10 +2,13 @@
 
 //function to instantiate the Leaflet map
 function createMap(){
+    var southWest = L.latLng(10, 64),
+    northEast = L.latLng(54, 143),
+    bounds = L.latLngBounds(southWest, northEast);
     //create the map
     L.mapbox.accessToken = 'pk.eyJ1IjoiZHVhbnlhbmciLCJhIjoiY2lrcG12MmpmMTJoNXUybTZhaWI4eXM4cCJ9.GikD77VU-5CGqW_XAazYYw';
     var map = L.mapbox.map('map', 'mapbox.light',{
-        //maxBounds: bounds,
+        maxBounds: bounds,
         maxZoom: 7,
         minZoom: 3
     });
@@ -36,6 +39,8 @@ function getData(map){
             createPropSymbols(response, map, years);
             //call function to create sequence control
             createSequenceControls(map, years);
+            setFilter(map, 2008);
+            createLegend(map, years);
         }
     });
 };
@@ -84,9 +89,17 @@ function calcPropRadius(attValue) {
     //area based on attribute value and scale factor
     var area = attValue * scaleFactor;
     //radius calculated based on area
-    var radius = Math.sqrt(area/Math.PI);
+    var radius = Math.sqrt(area/Math.PI) + 3;
 
     return radius;
+};
+
+function createPopup(properties, year, layer, radius){
+    var popupContent = "<p><b>City:</b> " + properties.City + "</p>";
+    popupContent += "<p><b>Air Quality Index in " + year + ":</b> " + properties[year] + "</p>";
+    layer.bindPopup(popupContent, {
+        offset: new L.point(0,-radius)
+    });
 };
 
 //function to convert markers to circle markers
@@ -108,14 +121,7 @@ function pointToLayer(feature, latlng, years){
     options.radius = calcPropRadius(attValue);
     //create circle marker layer
     var layer = L.circleMarker(latlng, options);
-    //build popup content string starting with city...Example 2.1 line 24
-    var popupContent = "<p><b>City:</b> " + feature.properties.City + "</p>";
-    //add formatted attribute to popup content string
-    var year = year.toString();
-    popupContent += "<p><b>Air Quality Index in " + year + ":</b> " + feature.properties[year] + "</p>";
-    //bind the popup to the circle marker
-    layer.bindPopup(popupContent);
-
+    createPopup(feature.properties, year.toString(), layer, options.radius);
     //return the circle marker to the L.geoJson pointToLayer option
     return layer;
 };
@@ -141,8 +147,9 @@ function createSequenceControls(map, years){
         });
 
         $(slider).on('input', function(){
+            //removeFilter();//reset filter menu, make all features show up when changing time
+            setFilter(map, years[$(this).val()]);//fifth interaction operator
             updatePropSymbols(map, years[$(this).val()]);
-            setFilter(map, years[$(this).val()]);
             $(".slider-label").text(years[this.value]);
         });
         //slider is actually designed as an input tag
@@ -153,23 +160,20 @@ function createSequenceControls(map, years){
     createSliderLabel(map, years[0]);
 };
 
+//update symbols based on given year 
 function updatePropSymbols(map, year){
     map.eachLayer(function(layer){
         if (layer.feature && layer.feature.properties[year]){
             var props = layer.feature.properties;
             var radius = calcPropRadius(props[year]);
             layer.setRadius(radius);
-
-            var popupContent = "<p><b>City:</b> " + props.City + "</p>";
-            popupContent += "<p><b>Air Quality Index in " + year + ":</b> " + layer.feature.properties[year] + "</p>";
-            layer.bindPopup(popupContent, {
-                offset: new L.Point(0,-radius)
-            });
+            createPopup(props, year, layer, radius);
 
         };
     });
 };
 
+//use an output class to label the slider
 function createSliderLabel(map, year){
     var sliderLabelControl = L.control();
     sliderLabelControl.onAdd = function(map){
@@ -180,32 +184,132 @@ function createSliderLabel(map, year){
     sliderLabelControl.addTo(map);
 };
 
+//fifth interaction operator, filter
 function setFilter(map, year){
     var all = document.getElementById('filter-all');
     var good = document.getElementById('filter-good');
+    var bad = document.getElementById('filter-bad');
+
 
     all.onclick = function(){
-        console.log('allclick');
         good.className = '';
+        bad.className = '';
         this.className = 'active';
+        //this takes each obj in the feature layer, true to show up, false  to hide
         featureLayer.setFilter(function(feature){
             return true;
         });
+        //filter only works for the featureLayer when it is just defined, with no
+        //symbol update, so need to update again after filter 
+        updatePropSymbols(map, year);
         return false;
     };
 
     good.onclick = function(e){
-        console.log('goodclick');
         all.className = '';
+        bad.className = '';
         this.className = 'active';
         featureLayer.setFilter(function(feature){
             if (feature.properties[year] < 100) {
                 return true;
             };
         });
+        updatePropSymbols(map, year);
         return false;
     };
+
+    bad.onclick = function(e){
+        all.className = '';
+        good.className = '';
+        this.className = 'active';
+        featureLayer.setFilter(function(feature){
+            if (feature.properties[year] > 100) {
+                return true;
+            };
+        });
+        updatePropSymbols(map, year);
+        return false;
+    };
+//trigger(simulated) click on the currently activated filter
+    if (all.className == 'active') {
+        $(all).trigger('click');
+    };
+    if (good.className == 'active') {
+        $(good).trigger('click');
+    };
+    if (bad.className == 'active') {
+        $(bad).trigger('click');
+    };
 };
+
+//fifth interaction operator, filter
+function removeFilter(){
+    var all = document.getElementById('filter-all');
+    var good = document.getElementById('filter-good');
+    var bad = document.getElementById('filter-bad');
+//reset the filter menu
+    all.className = 'active';
+    good.className = '';
+    bad.className = '';
+
+    featureLayer.setFilter(function(){return true;});
+
+};
+
+function createLegend(map, years){
+    var legendControl = L.control({position:"bottomright"});
+    legendControl.onAdd = function(map){
+        var container = L.DomUtil.create('div', 'legend-control-container');
+        //add temporal legend div to container
+        $(container).append('<div id="legend-title">')
+        //Step 1: start attribute legend svg string
+        var svg = '<svg id="attribute-legend" width="160px" height="100px">';
+        var circles = {
+            max: 30,
+            mean: 50,
+            min: 74
+        };
+        for (var circle in circles){
+            svg += '<circle class="legend-circle" id="' + circle + 
+            '" fill="#F47821" fill-opacity="0.8" stroke="#000000" cx="80"/>';
+
+            svg += '<text id="' + circle + '-text" x="70" y="' + circles[circle] + '"></text>';
+        };
+
+        svg += "</svg>";
+        //add attribute legend svg to container
+        $(container).append(svg);
+
+        return container;
+    };
+
+    legendControl.addTo(map);
+
+
+    var content = "Air Quality Index";
+    //replace legend content
+    $('#legend-title').html(content);
+    var circleValues = {
+        max: 223,
+        mean: 135,
+        min: 46
+    };
+
+    for (var key in circleValues){
+        //get the radius
+        var radius = calcPropRadius(circleValues[key]);
+
+        //Step 3: assign the cy and r attributes
+        $('#'+key).attr({
+            cy: 99 - radius,
+            r: radius
+        });
+
+        $('#'+key+'-text').text(Math.round(circleValues[key]*100)/100);
+    };
+
+};
+
 
 
 $(document).ready(createMap);

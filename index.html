@@ -6,8 +6,7 @@
 		<title>China air quality</title>
 
 		<!--put your external stylesheet links here-->
-<!-- 		<link href='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.css' rel='stylesheet' />
- -->	<link rel="stylesheet" href="lib/leaflet/leaflet.css" />
+		<link rel="stylesheet" href="lib/leaflet/leaflet.css" />
 		<link rel="stylesheet" href="css/style.css">
 		<!--[if IE<9]>
 			<link rel="stylesheet" href="css/style.ie.css">
@@ -17,11 +16,27 @@
 	<body>
 		<!--put your initial page content here-->
 		<nav id='menu-ui' class='menu-ui'>
-	    <a href='#' class='active' id='filter-all'>All</a>
-	    <a href='#' id='filter-good'>Good</a>
+	    <a href='#' id='filter-all'>All</a>
+	    <a href='#' id='filter-good'>Satisfactory</a>
+	    <a href='#' id='filter-bad'>Unhealthy</a>
 		</nav>
+		<div id="wrapper">
+		<div class="title">Red Alert: Air Pollution in China</div>
+
+		<p class="description">
+			China has experienced fast economic growth in the past 30 years. However, the economic success comes at the price of environmental pollution, especially air pollution. In recent years most cities in China had been covered by a dark sky during some days in winter.</br></br>
+			This map shows the Air Quality Index (AQI) in 15 major cities across the past 7 years. AQI is calculated from five air pollutants and focuses on health effects people may experience after breathing polluted air. AQI values < 100 are generally thought of as satisfactory, while values > 100 indicates air quality is unhealthy first for certain sensitive groups of people, then for everyone as AQI values get higher.</br></br>
+			Overall air quality is getting worse for most cities. The number of cities with unhealty air condition keeps increasing, along with their AQI values.
+		</p>
+		<p class="source">Data source: </br>
+        <a href="http://datacenter.mep.gov.cn/">Ministry of Environmental Protection, China</a></br></br>
+        Text source: </br>
+        <a href="https://airnow.gov/index.cfm?action=aqibasics.aqi">Qir Quality Index Basics</a>
+		</p>
+
+
+		</div>
 		<div id="map"></div>
-		<div id="panel"></div>
 		<!--you can also use this space for internal scripts or stylesheets;
 		place these within <script> or <style> tags-->
 
