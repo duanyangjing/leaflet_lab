@@ -40,10 +40,7 @@ function getData(map){
             //call function to create sequence control
             createSequenceControls(map, years);
             setFilter(map, 2008);
-<<<<<<< HEAD
             createLegend(map, years);
-=======
->>>>>>> origin/master
         }
     });
 };
@@ -150,11 +147,7 @@ function createSequenceControls(map, years){
         });
 
         $(slider).on('input', function(){
-<<<<<<< HEAD
             //removeFilter();//reset filter menu, make all features show up when changing time
-=======
-            removeFilter();//reset filter menu, make all features show up when changing time
->>>>>>> origin/master
             setFilter(map, years[$(this).val()]);//fifth interaction operator
             updatePropSymbols(map, years[$(this).val()]);
             $(".slider-label").text(years[this.value]);
@@ -196,10 +189,6 @@ function setFilter(map, year){
     var all = document.getElementById('filter-all');
     var good = document.getElementById('filter-good');
     var bad = document.getElementById('filter-bad');
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/master
 
     all.onclick = function(){
         good.className = '';
